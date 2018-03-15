@@ -1,14 +1,14 @@
 package pool
 
 import (
-	"net"
 	"sync"
+	"github.com/gorilla/websocket"
 )
 
 // PoolConn is a wrapper around net.Conn to modify the the behavior of
 // net.Conn's Close() method.
 type PoolConn struct {
-	net.Conn
+	*websocket.Conn
 	mu       sync.RWMutex
 	c        *channelPool
 	unusable bool
@@ -36,7 +36,7 @@ func (p *PoolConn) MarkUnusable() {
 }
 
 // newConn wraps a standard net.Conn to a poolConn net.Conn.
-func (c *channelPool) wrapConn(conn net.Conn) net.Conn {
+func (c *channelPool) wrapConn(conn *websocket.Conn) *PoolConn {
 	p := &PoolConn{c: c}
 	p.Conn = conn
 	return p
